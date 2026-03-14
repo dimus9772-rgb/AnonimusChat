@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Анонимный чат</title>
+
+<style>
+body{
+font-family: Arial;
+background:#111;
+color:white;
+max-width:600px;
+margin:auto;
+}
+
+.chat{
+background:#222;
+padding:10px;
+height:400px;
+overflow-y:auto;
+}
+
+.message{
+padding:5px;
+border-bottom:1px solid #444;
+}
+
+form{
+display:flex;
+margin-top:10px;
+}
+
+input{
+flex:1;
+padding:10px;
+}
+
+button{
+padding:10px;
+}
+
+
+.logo{
+width:32px;
+height:32px;
+}
+</style>
+
+<script>
+setInterval(()=>{
+location.reload();
+},3000)
+</script>
+
+</head>
+
+<body>
+
+<h2>Анонимный чат</h2>
+
+<div class="chat">
+
+{% for m in messages %}
+<div class="message">{{m}}</div>
+{% endfor %}
+
+</div>
+
+<form method="POST">
+
+<input name="message" placeholder="Напиши сообщение..." required>
+
+<button>Отправить</button>
+
+</form>
+
+</body>
+</html>
