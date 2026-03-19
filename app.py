@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, jsonify
 import json
 
 app = Flask(__name__)
@@ -16,25 +16,30 @@ def save_messages(messages):
         json.dump(messages, f, ensure_ascii=False)
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def index():
-
-    if request.method == "POST":
-        text = request.form.get("message")
-
-        if text:
-            messages = load_messages()
-            messages.append(text)
-
-            messages = messages[-40:]
-
-            save_messages(messages)
-
-        return redirect("/")
-
     messages = load_messages()
-
     return render_template("index.html", messages=messages)
+
+
+@app.route("/api/messages", methods=["GET"])
+def get_messages():
+    messages = load_messages()
+    return jsonify(messages)
+
+
+@app.route("/api/messages", methods=["POST"])
+def post_message():
+    data = request.get_json()
+    text = data.get("message")
+    
+    if text:
+        messages = load_messages()
+        messages.append(text)
+        messages = messages[-13:]
+        save_messages(messages)
+        
+    return jsonify({"success": True})
 
 
 if __name__ == "__main__":

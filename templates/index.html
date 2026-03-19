@@ -46,12 +46,6 @@ height:32px;
 }
 </style>
 
-<script>
-setInterval(()=>{
-location.reload();
-},3000)
-</script>
-
 </head>
 
 <body>
@@ -66,13 +60,66 @@ location.reload();
 
 </div>
 
-<form method="POST">
+<form>
 
 <input name="message" placeholder="Напиши сообщение..." required>
 
 <button>Отправить</button>
 
 </form>
+
+<script>
+// Функция для обновления сообщений
+async function updateMessages() {
+    try {
+        const response = await fetch('/api/messages');
+        const messages = await response.json();
+        
+        const chatDiv = document.querySelector('.chat');
+        
+        // Сохраняем текущую позицию прокрутки
+        const isScrolledToBottom = chatDiv.scrollHeight - chatDiv.scrollTop === chatDiv.clientHeight;
+        
+        // Обновляем сообщения
+        chatDiv.innerHTML = messages.map(m => `<div class="message">${m}</div>`).join('');
+        
+        // Прокручиваем вниз, если мы были внизу
+        if (isScrolledToBottom) {
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        }
+    } catch (error) {
+        console.error('Ошибка при получении сообщений:', error);
+    }
+}
+
+// Обновляем сообщения каждые 3 секунды
+setInterval(updateMessages, 3000);
+
+// Обработка отправки формы
+document.querySelector('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const input = document.querySelector('input[name="message"]');
+    const message = input.value.trim();
+    
+    if (message) {
+        try {
+            await fetch('/api/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message }),
+            });
+            
+            input.value = '';
+            updateMessages(); // Сразу обновляем сообщения
+        } catch (error) {
+            console.error('Ошибка при отправке сообщения:', error);
+        }
+    }
+});
+</script>
 
 </body>
 </html>
