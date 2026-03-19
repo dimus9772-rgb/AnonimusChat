@@ -280,10 +280,6 @@ document.querySelectorAll('.puk-button').forEach(button => {
             });
             
             const data = await response.json();
-            
-            if (!data.success) {
-                alert(data.error || 'Ошибка при покупке пука');
-            }
         } catch (error) {
             console.error('Ошибка при покупке пука:', error);
             alert('Ошибка при покупке пука');
