@@ -67,8 +67,30 @@ def post_bablo():
     bablo = load_bablo()
     bablo += 1
     save_bablo(bablo)
-    socketio.emit('bablo_update', {'bablo': bablo})
+    socketio.emit('bablo_update', {'bablo': bablo, 'play_sound': True})
     return jsonify({"bablo": bablo})
+
+
+@app.route("/api/buy-puk", methods=["POST"])
+def buy_puk():
+    data = request.get_json()
+    cost = data.get("cost")
+    sound_file = data.get("sound")
+    
+    if cost is None or sound_file is None:
+        return jsonify({"success": False, "error": "Missing cost or sound"}), 400
+    
+    bablo = load_bablo()
+    
+    if bablo < cost:
+        return jsonify({"success": False, "error": "Not enough bablo", "bablo": bablo}), 400
+    
+    bablo -= cost
+    save_bablo(bablo)
+    socketio.emit('bablo_update', {'bablo': bablo, 'play_sound': False})
+    socketio.emit('puk_sound', {'sound': sound_file})
+    
+    return jsonify({"success": True, "bablo": bablo})
 
 
 if __name__ == "__main__":

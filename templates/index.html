@@ -89,6 +89,38 @@ transform:scale(0.95);
 .bablo-button:hover{
 background:#45a049;
 }
+
+.puk-buttons{
+margin-top:20px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.puk-button{
+width:100%;
+padding:15px;
+font-size:16px;
+background:#FF9800;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+transition:transform 0.1s, background 0.2s;
+}
+
+.puk-button:active{
+transform:scale(0.95);
+}
+
+.puk-button:hover{
+background:#F57C00;
+}
+
+.puk-button:disabled{
+background:#666;
+cursor:not-allowed;
+}
 </style>
 
 </head>
@@ -121,6 +153,14 @@ background:#45a049;
 <div class="bablo-count" id="bablo-count">0</div>
 <button class="bablo-button" id="bablo-button">НАЖМИ!</button>
 <audio id="bablo-sound" src="/static/BabloZvyk.mp3" preload="auto"></audio>
+
+<div class="puk-buttons">
+<button class="puk-button" id="puk-5" data-cost="5" data-sound="farts5.mp3">Маленький пук - 5</button>
+<button class="puk-button" id="puk-10" data-cost="10" data-sound="fart10.mp3">Средний пук - 10</button>
+<button class="puk-button" id="puk-15" data-cost="15" data-sound="fart15.mp3">Большой пук - 15</button>
+</div>
+
+<audio id="puk-sound" preload="auto"></audio>
 </div>
 </div>
 
@@ -208,10 +248,47 @@ document.getElementById('bablo-button').addEventListener('click', async () => {
 socket.on('bablo_update', (data) => {
     document.getElementById('bablo-count').textContent = data.bablo;
     
-    // Воспроизводим звук бабло
-    const sound = document.getElementById('bablo-sound');
+    // Воспроизводим звук бабло только если play_sound равен true
+    if (data.play_sound) {
+        const sound = document.getElementById('bablo-sound');
+        sound.currentTime = 0;
+        sound.play();
+    }
+});
+
+// Обработка события звука пука через WebSocket
+socket.on('puk_sound', (data) => {
+    const sound = document.getElementById('puk-sound');
+    sound.src = '/static/' + data.sound;
     sound.currentTime = 0;
     sound.play();
+});
+
+// Обработка клика на кнопки покупки пуков
+document.querySelectorAll('.puk-button').forEach(button => {
+    button.addEventListener('click', async () => {
+        const cost = parseInt(button.dataset.cost);
+        const soundFile = button.dataset.sound;
+        
+        try {
+            const response = await fetch('/api/buy-puk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ cost: cost, sound: soundFile }),
+            });
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                alert(data.error || 'Ошибка при покупке пука');
+            }
+        } catch (error) {
+            console.error('Ошибка при покупке пука:', error);
+            alert('Ошибка при покупке пука');
+        }
+    });
 });
 
 // Начальное обновление бабло
