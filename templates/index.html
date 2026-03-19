@@ -220,7 +220,7 @@ cursor:not-allowed;
 
 <body>
 
-<h2>Анонимный чат</h2>
+<h2>Анонимный чат <span id="users-count">👥 0 пользователей</span></h2>
 
 <div class="container">
 <div class="chat-container">
@@ -349,6 +349,11 @@ socket.on('bablo_update', (data) => {
     }
 });
 
+// Обработка события обновления количества пользователей через WebSocket
+socket.on('users_update', (data) => {
+    document.getElementById('users-count').textContent = '👥 ' + data.count + ' пользователей';
+});
+
 // Обработка события звука пука через WebSocket
 socket.on('puk_sound', (data) => {
     const sound = document.getElementById('puk-sound');
@@ -380,8 +385,22 @@ document.querySelectorAll('.puk-button').forEach(button => {
     });
 });
 
+// Функция для обновления количества пользователей
+async function updateUsers() {
+    try {
+        const response = await fetch('/api/users');
+        const data = await response.json();
+        document.getElementById('users-count').textContent = '👥 ' + data.count + ' пользователей';
+    } catch (error) {
+        console.error('Ошибка при получении пользователей:', error);
+    }
+}
+
 // Начальное обновление бабло
 updateBablo();
+
+// Начальное обновление пользователей
+updateUsers();
 </script>
 
 </body>

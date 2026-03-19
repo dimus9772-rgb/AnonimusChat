@@ -8,6 +8,7 @@ socketio = SocketIO(app)
 
 FILE = "messages.json"
 BABLO_FILE = "bablo.json"
+USERS_FILE = "users.json"
 
 
 def load_messages():
@@ -28,6 +29,34 @@ def load_bablo():
 def save_bablo(amount):
     with open(BABLO_FILE, "w", encoding="utf-8") as f:
         f.write(str(amount))
+
+
+def load_users():
+    with open(USERS_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_users(users_data):
+    with open(USERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(users_data, f, ensure_ascii=False)
+
+
+def add_user(ip):
+    users_data = load_users()
+    if ip not in users_data["unique_ips"]:
+        users_data["unique_ips"].append(ip)
+        users_data["count"] = len(users_data["unique_ips"])
+        save_users(users_data)
+        return True
+    return False
+
+
+def remove_user(ip):
+    users_data = load_users()
+    if ip in users_data["unique_ips"]:
+        users_data["unique_ips"].remove(ip)
+        users_data["count"] = len(users_data["unique_ips"])
+        save_users(users_data)
 
 
 @app.route("/")
@@ -91,6 +120,26 @@ def buy_puk():
     socketio.emit('puk_sound', {'sound': sound_file})
     
     return jsonify({"success": True, "bablo": bablo})
+
+
+@app.route("/api/users", methods=["GET"])
+def get_users():
+    users_data = load_users()
+    return jsonify({"count": users_data["count"]})
+
+
+@socketio.on('connect')
+def handle_connect():
+    ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+    if add_user(ip):
+        socketio.emit('users_update', {'count': load_users()["count"]})
+
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+    if remove_user(ip):
+        socketio.emit('users_update', {'count': load_users()["count"]})
 
 
 if __name__ == "__main__":
