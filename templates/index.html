@@ -2,25 +2,33 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Анонимный чат</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 
 <style>
+*{
+box-sizing:border-box;
+}
+
 body{
 font-family: Arial;
 background:#111;
 color:white;
 max-width:900px;
 margin:auto;
+overflow-x:hidden;
 }
 
 .container{
 display:flex;
 gap:20px;
+flex-wrap:wrap;
 }
 
 .chat-container{
 flex:1;
+min-width:0;
 }
 
 .chat{
@@ -28,6 +36,7 @@ background:#222;
 padding:10px;
 height:400px;
 overflow-y:auto;
+overflow-x:hidden;
 }
 
 .message{
@@ -121,6 +130,90 @@ background:#F57C00;
 background:#666;
 cursor:not-allowed;
 }
+
+/* Адаптивный дизайн для мобильных устройств */
+@media (max-width: 768px) {
+    body{
+        max-width:100%;
+        padding:10px;
+    }
+    
+    .container{
+        flex-direction:column;
+        flex-wrap:nowrap;
+    }
+    
+    .chat-container{
+        width:100%;
+    }
+    
+    .bablo-container{
+        width:100%;
+        margin-top:20px;
+    }
+    
+    .chat{
+        height:50vh;
+        flex:1;
+    }
+    
+    .bablo-count{
+        font-size:36px;
+    }
+    
+    .bablo-button,
+    .puk-button{
+        font-size:18px;
+        padding:15px;
+    }
+    
+    /* Улучшения для touch-устройств */
+    button{
+        -webkit-tap-highlight-color:transparent;
+        min-height:44px;
+    }
+    
+    input{
+        min-height:44px;
+    }
+}
+
+@media (max-width: 480px) {
+    h2{
+        font-size:20px;
+    }
+    
+    .chat-container{
+        width:100%;
+    }
+    
+    .chat{
+        height:40vh;
+    }
+    
+    .bablo-count{
+        font-size:32px;
+    }
+    
+    .bablo-button,
+    .puk-button{
+        font-size:16px;
+        padding:12px;
+    }
+    
+    form{
+        flex-wrap:wrap;
+    }
+    
+    input{
+        width:100%;
+        margin-bottom:10px;
+    }
+    
+    button[type="submit"]{
+        width:100%;
+    }
+}
 </style>
 
 </head>
@@ -141,7 +234,7 @@ cursor:not-allowed;
 
 <form>
 
-<input name="message" placeholder="Напиши сообщение..." required>
+<input name="message" placeholder="Напиши сообщение..." required maxlength="100">
 
 <button>Отправить</button>
 

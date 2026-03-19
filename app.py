@@ -50,7 +50,7 @@ def post_message():
     if text:
         messages = load_messages()
         messages.append(text)
-        messages = messages[-13:]
+        messages = messages[-12:]
         save_messages(messages)
         
     return jsonify({"success": True})
