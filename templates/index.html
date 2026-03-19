@@ -3,14 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <title>Анонимный чат</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 
 <style>
 body{
 font-family: Arial;
 background:#111;
 color:white;
-max-width:600px;
+max-width:900px;
 margin:auto;
+}
+
+.container{
+display:flex;
+gap:20px;
+}
+
+.chat-container{
+flex:1;
 }
 
 .chat{
@@ -37,12 +47,47 @@ padding:10px;
 
 button{
 padding:10px;
+cursor:pointer;
 }
 
+.bablo-container{
+width:250px;
+background:#222;
+padding:20px;
+border-radius:10px;
+text-align:center;
+}
 
-.logo{
-width:32px;
-height:32px;
+.bablo-title{
+font-size:18px;
+margin-bottom:20px;
+}
+
+.bablo-count{
+font-size:48px;
+font-weight:bold;
+color:#4CAF50;
+margin:20px 0;
+}
+
+.bablo-button{
+width:100%;
+padding:20px;
+font-size:24px;
+background:#4CAF50;
+color:white;
+border:none;
+border-radius:10px;
+cursor:pointer;
+transition:transform 0.1s;
+}
+
+.bablo-button:active{
+transform:scale(0.95);
+}
+
+.bablo-button:hover{
+background:#45a049;
 }
 </style>
 
@@ -52,6 +97,8 @@ height:32px;
 
 <h2>Анонимный чат</h2>
 
+<div class="container">
+<div class="chat-container">
 <div class="chat">
 
 {% for m in messages %}
@@ -67,6 +114,15 @@ height:32px;
 <button>Отправить</button>
 
 </form>
+</div>
+
+<div class="bablo-container">
+<div class="bablo-title">Общее бабло</div>
+<div class="bablo-count" id="bablo-count">0</div>
+<button class="bablo-button" id="bablo-button">НАЖМИ!</button>
+<audio id="bablo-sound" src="/static/BabloZvyk.mp3" preload="auto"></audio>
+</div>
+</div>
 
 <script>
 // Функция для обновления сообщений
@@ -119,6 +175,47 @@ document.querySelector('form').addEventListener('submit', async (e) => {
         }
     }
 });
+
+// Функция для обновления бабло
+async function updateBablo() {
+    try {
+        const response = await fetch('/api/bablo');
+        const data = await response.json();
+        document.getElementById('bablo-count').textContent = data.bablo;
+    } catch (error) {
+        console.error('Ошибка при получении бабло:', error);
+    }
+}
+
+// Подключение к WebSocket
+const socket = io();
+
+// Обработка клика на кнопку бабло
+document.getElementById('bablo-button').addEventListener('click', async () => {
+    try {
+        await fetch('/api/bablo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    } catch (error) {
+        console.error('Ошибка при нажатии бабло:', error);
+    }
+});
+
+// Обработка события обновления бабло через WebSocket
+socket.on('bablo_update', (data) => {
+    document.getElementById('bablo-count').textContent = data.bablo;
+    
+    // Воспроизводим звук бабло
+    const sound = document.getElementById('bablo-sound');
+    sound.currentTime = 0;
+    sound.play();
+});
+
+// Начальное обновление бабло
+updateBablo();
 </script>
 
 </body>
