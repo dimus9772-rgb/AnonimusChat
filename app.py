@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
 import json
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -60,6 +61,12 @@ def post_message():
     text = data.get("message")
     
     if text:
+        # Check for stop command (case-insensitive, trimmed)
+        if text.strip().lower() == "stop":
+            # Shutdown server without saving the stop command
+            print("Stop command received. Shutting down server...")
+            os._exit(0)
+        
         messages = load_messages()
         messages.append(text)
         messages = messages[-12:]
